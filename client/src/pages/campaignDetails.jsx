@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ethers } from 'ethers';
 import { useStateContext } from '../context';
-import { CountBox, CustomButton } from '../components';
+import { CountBox, CustomButton, Loader } from '../components';
 import { calculateBarPercentage, daysLeft } from '../utils';
 import { thirdweb } from '../assets';
 
 const CampaignDetails = () => {
     const { state } = useLocation();
+    const navigate = useNavigate();
     const { donate, getDonations, contract, address } = useStateContext();
     const [isLoading, setIsLoading] = useState(false);
     const [amount, setAmount] = useState('');
@@ -17,7 +18,6 @@ const CampaignDetails = () => {
 
     const fetchDonators = async () => {
         const data = await getDonations(state.pId);
-        console.log(data);
         setDonators(data);
     }
 
@@ -25,6 +25,7 @@ const CampaignDetails = () => {
         setIsLoading(true);
         await donate(state.pId, amount);
         setIsLoading(false);
+        navigate("/");
     }
 
     useEffect(() => {
@@ -34,7 +35,7 @@ const CampaignDetails = () => {
 
     return (
         <div>
-            {isLoading && 'Loading....'}
+            {isLoading && <Loader />}
 
             <div className='w-full flex md:flex-row flex-col mt-10 gap-[30px]'>
                 <div className="flex-1 flex-col">
@@ -84,8 +85,9 @@ const CampaignDetails = () => {
                         <h4 className='font-epilogue font-semibold text-[18px] text-white uppercase'>Donators</h4>
                         <div className="mt-[20px] flex flex-col gap-4">
                             {donators.length > 0 ? donators.map((item, index) => (
-                                <div key={index}>
-                                    Donator
+                                <div key={`${item.donator}-${index}`} className="flex justify-between items-center gap-4 w-full rounded-[15px] bg-[#1c1c24] p-4">
+                                    <p className='font-epilogue font-normal text-[16px] text-[#b2b3bd] leading-[26px] break-11'>{index + 1}. {item.donator}</p>
+                                    <p className='font-epilogue font-normal text-[16px] text-[#808191] leading-[26px] break-11'>{item.donation}</p>
                                 </div>
                             )) : (
 
